@@ -1,6 +1,6 @@
 package com.example.API_Cinema.filter;
 
-import com.example.API_Cinema.components.JWTTokenUtils;
+import com.example.API_Cinema.utils.JWTTokenUtils;
 import com.example.API_Cinema.model.User;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -17,7 +17,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.security.InvalidParameterException;
 import java.util.Arrays;
 import java.util.List;
 

@@ -1,24 +1,20 @@
 package com.example.API_Cinema.dto;
 
-import jakarta.persistence.Column;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.Data;
-
+import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Date;
 
 @Data
-public class MovieDTO {
-    @NotNull(message = "Movie ID cannot be null")
-    private int id;
-
+public class MovieCreateDTO {
+    // Remove ID since it's auto-generated for new movies
     @NotBlank(message = "Name cannot be blank")
     private String name;
-    private String smallImgMovie;
-    private String largeImgMovie;
+
+    // These will hold the MultipartFile objects
+    private MultipartFile smallImgMovieFile;
+    private MultipartFile largeImgMovieFile;
+
     @NotBlank(message = "Short description cannot be blank")
     @Size(max = 500, message = "Short description must be less than or equal to 500 characters")
     private String shortDescription;

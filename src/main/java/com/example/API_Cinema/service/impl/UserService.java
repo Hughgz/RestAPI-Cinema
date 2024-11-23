@@ -1,10 +1,8 @@
 package com.example.API_Cinema.service.impl;
 
-import com.example.API_Cinema.components.JWTTokenUtils;
+import com.example.API_Cinema.utils.JWTTokenUtils;
 import com.example.API_Cinema.dto.UserDTO;
 import com.example.API_Cinema.exception.DataNotFoundException;
-import com.example.API_Cinema.exception.PermissionDenyException;
-import com.example.API_Cinema.filter.JwtTokenFilter;
 import com.example.API_Cinema.model.Role;
 import com.example.API_Cinema.model.User;
 import com.example.API_Cinema.repo.RoleRepo;
@@ -18,9 +16,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.ui.Model;
 
-import javax.swing.text.html.Option;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -48,9 +44,9 @@ public class UserService implements IUserService {
         }
         Role role =roleRepo.findById(dto.getRoleId())
                 .orElseThrow(() -> new DataNotFoundException("Role not found"));
-        if(role.getName().toUpperCase().equals(Role.ADMIN)) {
-            throw new PermissionDenyException("You cannot register an admin account");
-        }
+//        if(role.getName().toUpperCase().equals(Role.ADMIN)) {
+//            throw new PermissionDenyException("You cannot register an admin account");
+//        }
         User newUser = new ModelMapper().map(dto, User.class);
         newUser.setRole(role);
         String password = dto.getPassword();
@@ -69,6 +65,7 @@ public class UserService implements IUserService {
             currentUser.setBirthdate(dto.getBirthdate());
             currentUser.setSex(dto.getSex());
             currentUser.setArea(dto.getArea());
+            currentUser.setRole(roleRepo.findById(dto.getRoleId()).get());
             String password = dto.getPassword();
             String encoderPass = passwordEncoder.encode(password);
             currentUser.setPassword(encoderPass);
@@ -87,8 +84,12 @@ public class UserService implements IUserService {
     @Override
     public List<UserDTO> getAll() {
         List<User> userList = repository.findAll();
-        return userList.stream().map(user -> convert(user)).collect(Collectors.toList());
+        System.out.println("User List: " + userList); // Log userList
+        List<UserDTO> userDTOS = userList.stream().map(this::convert).collect(Collectors.toList());
+        System.out.println("User DTOs: " + userDTOS); // Log userDTOS
+        return userDTOS;
     }
+
 
     @Override
     public List<UserDTO> searchByFullName(String fullName) {
@@ -97,9 +98,9 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public List<UserDTO> searchByPhone(String phone) {
-        Optional<User> userList = repository.findByPhone(phone);
-        return userList.stream().map(user -> convert(user)).collect(Collectors.toList());
+    public UserDTO searchByPhone(String phone) {
+        User user = repository.findByPhone(phone);
+        return convert(user);
     }
 
     @Override
@@ -121,12 +122,12 @@ public class UserService implements IUserService {
 
     @Override
     public String login(String phoneNumber, String password, Integer roleId) throws Exception {
-        Optional<User> optionalUser = repository.findByPhone(phoneNumber);
-        if(optionalUser.isEmpty()) {
+        User optionalUser = repository.findByPhone(phoneNumber);
+        if(optionalUser == null) {
             throw new DataNotFoundException("Phone does not exits");
         }
         //return optionalUser.get();//muốn trả JWT token ?
-        User existingUser = optionalUser.get();
+        User existingUser = optionalUser;
         //check password
         if(!passwordEncoder.matches(password, existingUser.getPassword())) {
             throw new BadCredentialsException("Password doesn't match, please try again");

@@ -19,7 +19,7 @@ public class SecurityConfig {
     UserRepo repository;
     @Bean
     public UserDetailsService userDetailsService(){
-        return phone -> repository.findByPhone(phone).orElseThrow(() -> new UsernameNotFoundException("Cannot find user with phone number " + phone));
+        return phone -> repository.findByPhone(phone);
     }
 
     @Bean

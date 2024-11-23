@@ -1,5 +1,6 @@
 package com.example.API_Cinema.response;
 
+import com.example.API_Cinema.dto.UserDTO;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
@@ -14,4 +15,7 @@ public class LoginResponse {
 
     @JsonProperty("token")
     private String token;
+
+    @JsonProperty("user")
+    private UserDTO user;
 }

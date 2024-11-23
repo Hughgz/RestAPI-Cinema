@@ -3,6 +3,7 @@ package com.example.API_Cinema.apis;
 import com.example.API_Cinema.dto.UserDTO;
 import com.example.API_Cinema.dto.UserLoginDTO;
 import com.example.API_Cinema.model.User;
+import com.example.API_Cinema.repo.UserRepo;
 import com.example.API_Cinema.response.LoginResponse;
 import com.example.API_Cinema.response.RegisterResponse;
 import com.example.API_Cinema.service.impl.UserService;
@@ -15,6 +16,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -22,6 +24,8 @@ import java.util.stream.Collectors;
 public class UserApi {
     @Autowired
     UserService service;
+    @Autowired
+    UserRepo repo;
 
     @PostMapping("/register")
     public ResponseEntity<RegisterResponse> createUser(
@@ -71,7 +75,7 @@ public class UserApi {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-    @GetMapping("")
+    @GetMapping
     public ResponseEntity<List<UserDTO>> getAll(){
         List<UserDTO> userDTOS = service.getAll();
         return ResponseEntity.status(200).body(userDTOS);
@@ -87,8 +91,8 @@ public class UserApi {
                 return ResponseEntity.ok(userDTOS);
             }
             if (keyword.equals("phone")) {
-                List<UserDTO> userDTOS = service.searchByPhone(title);
-                if (userDTOS.isEmpty()) {
+                UserDTO userDTOS = service.searchByPhone(title);
+                if (userDTOS == null) {
                     return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No User found with the specified phone");
                 }
                 return ResponseEntity.ok(userDTOS);
@@ -117,18 +121,27 @@ public class UserApi {
     public ResponseEntity<LoginResponse> login(
             @Valid @RequestBody UserLoginDTO userLoginDTO
     ) {
-        // Kiểm tra thông tin đăng nhập và sinh token
         try {
+            // Gọi phương thức login từ service để lấy token
             String token = service.login(
                     userLoginDTO.getPhoneNumber(),
                     userLoginDTO.getPassword(),
                     userLoginDTO.getRoleId()
             );
-            // Trả về token trong response
-            return ResponseEntity.ok(LoginResponse.builder()
-                    .message("Login successfully")
-                    .token(token)
-                    .build());
+
+            // Lấy thông tin user sau khi đăng nhập thành công
+            UserDTO userDTO = service.searchByPhone(userLoginDTO.getPhoneNumber());
+            if (userDTO == null) {
+                throw new RuntimeException("User not found after login");
+            }
+            // Tạo response
+            return ResponseEntity.ok(
+                    LoginResponse.builder()
+                            .message("Login successfully")
+                            .token(token)
+                            .user(userDTO)
+                            .build()
+            );
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(
                     LoginResponse.builder()

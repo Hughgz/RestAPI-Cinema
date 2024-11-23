@@ -1,4 +1,4 @@
-package com.example.API_Cinema.components;
+package com.example.API_Cinema.utils;
 
 import com.example.API_Cinema.model.User;
 import io.jsonwebtoken.Claims;

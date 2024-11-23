@@ -12,7 +12,7 @@ public interface IUserService{
     void delete(int id);
     List<UserDTO> getAll();
     List<UserDTO> searchByFullName(String fullName);
-    List<UserDTO> searchByPhone(String phone);
+    UserDTO searchByPhone(String phone);
     List<UserDTO> searchByEmail(String email);
     UserDTO findById(int id);
     UserDTO convert(User user);

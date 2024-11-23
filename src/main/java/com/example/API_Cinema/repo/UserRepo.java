@@ -12,9 +12,8 @@ import java.util.Optional;
 
 @Repository
 public interface UserRepo extends JpaRepository<User, Integer> {
-    @Query("SELECT user FROM User user WHERE user.phone LIKE %:phone%")
-    Optional<User> findByPhone(@Param("phone") String phone);
 
+    User findByPhone(String phone);
     @Query("SELECT user FROM User user WHERE user.fullName LIKE %:fullName%")
     List<User> findByName(@Param("fullName") String fullName);
 
