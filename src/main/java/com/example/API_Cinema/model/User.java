@@ -8,6 +8,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDate;
 import java.util.*;
 
 @Entity
@@ -24,9 +25,10 @@ public class User implements UserDetails {
     private String email;
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     @Column(nullable = false)
-    private Date birthdate;
+    private LocalDate birthdate;
     @Column(length = 10, nullable = false)
     private String sex;
+    private String image;
     @Column(length = 100, nullable = false)
     private String area;
     @Column(nullable = false)

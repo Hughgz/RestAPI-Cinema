@@ -1,4 +1,4 @@
-package com.example.API_Cinema.repo;
+package com.example.API_Cinema.repository;
 
 import com.example.API_Cinema.model.Schedule;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -25,4 +25,10 @@ public interface ScheduleRepo extends JpaRepository<Schedule, Integer> {
     List<LocalTime> getStartTimeByMovieIdAndBranchIdAndStartDate(@Param("movieId") Integer movieId
             , @Param("branchId") Integer branchId
             , @Param("startDate") LocalDate startDate);
+
+    @Query("SELECT schedule FROM Schedule schedule WHERE schedule.movie.movieUrl = :movieUrl")
+    List<Schedule> getSchedulesByMovieId(@Param("movieUrl") String movieUrl);
+
+    Boolean existsByStartTime(LocalTime startTime);
+    Boolean existsByStartDate(LocalDate startDate);
 }

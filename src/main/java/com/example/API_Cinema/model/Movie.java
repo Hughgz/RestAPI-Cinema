@@ -41,6 +41,8 @@ public class Movie {
     private String trailerURL;
     private String country;
     private String rated;
+    private String movieUrl;
+    private String type;
     private int showing;
 
 }

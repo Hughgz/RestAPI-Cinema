@@ -12,9 +12,9 @@ public class Room {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     private String name;
+    private int colNum;
+    private int rowNum;
     private int capacity; //Sức chứa
-    @Column(length = 1000)
-    private String imgRoom;
 
     @ManyToOne
     @JoinColumn(name = "branch_id", nullable = false)

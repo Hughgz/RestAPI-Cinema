@@ -4,7 +4,6 @@ import java.util.Map;
 
 import com.example.API_Cinema.exception.FuncErrorException;
 import com.example.API_Cinema.response.CloudinaryResponse;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -13,8 +12,12 @@ import com.cloudinary.Cloudinary;
 
 @Service
 public class CloudinaryService {
-    @Autowired
-    private Cloudinary cloudinary;
+
+    private final Cloudinary cloudinary;
+
+    public CloudinaryService(Cloudinary cloudinary) {
+        this.cloudinary = cloudinary;
+    }
 
     @Transactional
     public CloudinaryResponse uploadFile(final MultipartFile file, final String fileName) {

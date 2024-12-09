@@ -15,8 +15,6 @@ public class Branch {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     private String name;
-    @Column(length = 1000)
-    private String imgURL;
     @Column(length = 200)
     private String address;
     @Column(length = 10)

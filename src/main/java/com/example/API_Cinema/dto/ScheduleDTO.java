@@ -4,6 +4,7 @@ import com.example.API_Cinema.model.Branch;
 import com.example.API_Cinema.model.Movie;
 import com.example.API_Cinema.model.Room;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.Column;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -15,6 +16,7 @@ import java.time.LocalTime;
 public class ScheduleDTO {
     private int id;
     private LocalDate startDate;
+    @Column(unique = true)
     private LocalTime startTime;
 
     @NotNull(message = "Branch ID is required")
@@ -28,7 +30,4 @@ public class ScheduleDTO {
     @NotNull(message = "Movie ID is required")
     @JsonProperty("movie_id")
     private int movieID;
-
-    @NotNull(message = "Price cannot null")
-    private Double price;
 }

@@ -5,25 +5,29 @@ import com.example.API_Cinema.model.Bill;
 import com.example.API_Cinema.model.Schedule;
 import com.example.API_Cinema.model.Ticket;
 import com.example.API_Cinema.model.User;
-import com.example.API_Cinema.repo.*;
+import com.example.API_Cinema.repository.*;
 import com.example.API_Cinema.service.IBillService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
 @Service
 public class BillService implements IBillService {
-    @Autowired
-    private ScheduleRepo scheduleRepo;
-    @Autowired
-    private TicketRepo ticketRepo;
-    @Autowired
-    private UserRepo userRepo;
-    @Autowired
-    private SeatRepo seatRepo;
-    @Autowired
-    private BillRepo billRepo;
+    private final ScheduleRepo scheduleRepo;
+    private final TicketRepo ticketRepo;
+    private final UserRepo userRepo;
+    private final SeatRepo seatRepo;
+    private final BillRepo billRepo;
+
+
+    public BillService(ScheduleRepo scheduleRepo, TicketRepo ticketRepo, UserRepo userRepo, SeatRepo seatRepo, BillRepo billRepo) {
+        this.scheduleRepo = scheduleRepo;
+        this.ticketRepo = ticketRepo;
+        this.userRepo = userRepo;
+        this.seatRepo = seatRepo;
+        this.billRepo = billRepo;
+    }
+
     @Override
     public void createBill(BookingDTO bookingDTO) {
         //Lấy ra lịch chiếu phim
@@ -51,12 +55,14 @@ public class BillService implements IBillService {
             if(!ticketRepo.findTicketsByScheduleIdAndSeatId(schedule.getId(), seatId).isEmpty()){
                 throw new RuntimeException("Already booked, please choose another seat");
             }
-            ticketRepo.findById(seatId).orElseThrow(() -> new RuntimeException("Seat does not exits"));
+
             Ticket ticket = new Ticket();
-            ticket.setSeat(seatRepo.findById(seatId).orElse(null));
+            ticket.setSeat(seatRepo.findById(seatId).orElseThrow(() -> new RuntimeException("Seat not found")));
             ticket.setSchedule(schedule);
+            ticket.setTotalAmount(bookingDTO.getTotalAmount());
             ticket.setBill(saveBill);
-            ticket.setQrImgUrl("");
+
+            ticket.setPaymentMethod("VNPay");
             ticketRepo.save(ticket);
         });
     }

@@ -3,14 +3,12 @@ package com.example.API_Cinema.service.impl;
 import com.example.API_Cinema.dto.SeatDTO;
 import com.example.API_Cinema.model.Room;
 import com.example.API_Cinema.model.Seat;
-import com.example.API_Cinema.model.Ticket;
-import com.example.API_Cinema.repo.RoomRepo;
-import com.example.API_Cinema.repo.ScheduleRepo;
-import com.example.API_Cinema.repo.SeatRepo;
-import com.example.API_Cinema.repo.TicketRepo;
+import com.example.API_Cinema.repository.RoomRepo;
+import com.example.API_Cinema.repository.ScheduleRepo;
+import com.example.API_Cinema.repository.SeatRepo;
+import com.example.API_Cinema.repository.TicketRepo;
 import com.example.API_Cinema.service.ISeatService;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,14 +16,17 @@ import java.util.stream.Collectors;
 
 @Service
 public class SeatService implements ISeatService {
-    @Autowired
-    SeatRepo seatRepo;
-    @Autowired
-    ScheduleRepo scheduleRepo;
-    @Autowired
-    TicketRepo ticketRepo;
-    @Autowired
-    RoomRepo roomRepo;
+    private final SeatRepo seatRepo;
+    private final ScheduleRepo scheduleRepo;
+    private final TicketRepo ticketRepo;
+    private final RoomRepo roomRepo;
+
+    public SeatService(SeatRepo seatRepo, ScheduleRepo scheduleRepo, TicketRepo ticketRepo, RoomRepo roomRepo) {
+        this.seatRepo = seatRepo;
+        this.scheduleRepo = scheduleRepo;
+        this.ticketRepo = ticketRepo;
+        this.roomRepo = roomRepo;
+    }
 
 
     @Override
@@ -33,6 +34,12 @@ public class SeatService implements ISeatService {
         Seat seat = new ModelMapper().map(dto, Seat.class);
         roomRepo.findById(seat.getRoom().getId()).orElseThrow(() -> new RuntimeException("Room does not exits"));
         return seatRepo.save(seat);
+    }
+
+    @Override
+    public List<Seat> insertMultipleSeat(SeatDTO dto) {
+
+        return null;
     }
 
     @Override
@@ -52,7 +59,7 @@ public class SeatService implements ISeatService {
     }
 
     @Override
-    public SeatDTO findById(int seatId) {
+    public SeatDTO getSeatById(int seatId) {
         Seat seat = seatRepo.findById(seatId).orElseThrow(() -> new RuntimeException("Seat does not exits"));
         return convert(seat);
     }

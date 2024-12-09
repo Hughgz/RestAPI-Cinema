@@ -4,7 +4,6 @@ import com.example.API_Cinema.dto.MovieDTO;
 import com.example.API_Cinema.exception.DataNotFoundException;
 import com.example.API_Cinema.service.impl.MovieService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -19,8 +18,12 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/movie")
 public class MovieApi {
-    @Autowired
-    private MovieService service;
+
+    private final MovieService service;
+
+    public MovieApi(MovieService service) {
+        this.service = service;
+    }
 
     // Tạo mới movie
     @PostMapping("/new")
@@ -59,9 +62,13 @@ public class MovieApi {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+    @GetMapping("/getMovieByMovieUrl/{movieUrl}")
+    public ResponseEntity<MovieDTO> getMovieByMovieUrl(@PathVariable String movieUrl) throws DataNotFoundException {
+        MovieDTO movie = service.getMovieByMovieUrl(movieUrl);
+        return ResponseEntity.ok(movie);
+    }
 
-    // Lấy danh sách toàn bộ movie
-    @GetMapping("/getAll")
+    @GetMapping()
     public ResponseEntity<List<MovieDTO>> getAll() {
         List<MovieDTO> movieDTOS = service.getAll();
         return ResponseEntity.ok(movieDTOS);
@@ -98,6 +105,15 @@ public class MovieApi {
 
         return ResponseEntity.badRequest().body("Invalid keyword for search");
     }
+    @GetMapping("/getById/{id}")
+    public ResponseEntity<?> getByMovieId(@PathVariable int id) {
+        MovieDTO movie = service.findById(id);
+        if (movie == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(movie);
+    }
+
 
     // Utility function for handling validation and execution
     private ResponseEntity<?> handleValidationAndExecute(BindingResult result, ExecutableAction action) {

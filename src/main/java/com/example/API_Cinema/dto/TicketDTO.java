@@ -8,8 +8,8 @@ import lombok.Data;
 @Data
 public class TicketDTO {
     private int id;
-    private String qrImgUrl;
-    private Seat seat;
-    private Schedule schedule;
-    private Bill bill;
+    private double totalAmount;
+    private SeatDTO seat;
+    private ScheduleDTO schedule;
+    private BillDTO bill;
 }

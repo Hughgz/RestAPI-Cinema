@@ -2,27 +2,37 @@ package com.example.API_Cinema.service.impl;
 
 
 import com.example.API_Cinema.dto.BranchDTO;
+import com.example.API_Cinema.exception.ExistsDataException;
 import com.example.API_Cinema.model.Branch;
-import com.example.API_Cinema.repo.BranchRepo;
+import com.example.API_Cinema.repository.BranchRepo;
 import com.example.API_Cinema.service.IBranchService;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.ui.Model;
-import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 public class BranchService implements IBranchService {
-    @Autowired
-    BranchRepo repo;
+    private final BranchRepo repo;
+
+    public BranchService(BranchRepo repo) {
+        this.repo = repo;
+    }
 
 
     @Override
-    public void insert(BranchDTO dto){
+    public void insert(BranchDTO dto) throws ExistsDataException {
+        if(repo.existsByPhone(dto.getPhone())){
+            throw new ExistsDataException("Phone already exists");
+        }
+        if(repo.existsByName(dto.getName())){
+            throw new ExistsDataException("Name already exists");
+        }
+        if(repo.existsByAddress(dto.getAddress())){
+            throw new ExistsDataException("Address already exists");
+        }
         Branch branch = new ModelMapper().map(dto, Branch.class);
         repo.save(branch);
     }
@@ -32,7 +42,6 @@ public class BranchService implements IBranchService {
         Branch currentBranch = repo.findById(dto.getId()).orElseThrow(() -> new RuntimeException("Branch does not exits"));
         if(currentBranch != null){
             currentBranch.setName(dto.getName());
-            currentBranch.setImgURL(dto.getImgURL());
             currentBranch.setPhone(dto.getPhone());
             currentBranch.setAddress(dto.getAddress());
             repo.save(currentBranch);

@@ -3,17 +3,18 @@ package com.example.API_Cinema.apis;
 import com.example.API_Cinema.dto.SeatDTO;
 import com.example.API_Cinema.service.impl.SeatService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/seat")
 public class SeatApi {
-    @Autowired
-    private SeatService service;
+    private final SeatService service;
+
+    public SeatApi(SeatService service) {
+        this.service = service;
+    }
 
     @GetMapping("/getSeatByScheduleId")
     public ResponseEntity<?> getSeatByScheduleId(@Valid @RequestParam("scheduleId") int scheduleId){
@@ -32,5 +33,11 @@ public class SeatApi {
     public ResponseEntity<?> updateSeat(@Valid @RequestBody SeatDTO dto){
         SeatDTO seatDTO = service.update(dto);
         return ResponseEntity.status(201).body(seatDTO);
+    }
+
+    @GetMapping("/getSeatById/{id}")
+    public ResponseEntity<?> getSeatById(@PathVariable int id){
+        SeatDTO seat = service.getSeatById(id);
+        return ResponseEntity.ok(seat);
     }
 }

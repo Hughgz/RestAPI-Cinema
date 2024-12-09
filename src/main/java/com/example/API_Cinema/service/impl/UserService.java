@@ -1,38 +1,45 @@
 package com.example.API_Cinema.service.impl;
 
+import com.example.API_Cinema.response.CloudinaryResponse;
+import com.example.API_Cinema.utils.FileUploadUtils;
 import com.example.API_Cinema.utils.JWTTokenUtils;
 import com.example.API_Cinema.dto.UserDTO;
 import com.example.API_Cinema.exception.DataNotFoundException;
 import com.example.API_Cinema.model.Role;
 import com.example.API_Cinema.model.User;
-import com.example.API_Cinema.repo.RoleRepo;
-import com.example.API_Cinema.repo.UserRepo;
+import com.example.API_Cinema.repository.RoleRepo;
+import com.example.API_Cinema.repository.UserRepo;
 import com.example.API_Cinema.service.IUserService;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 public class UserService implements IUserService {
-    @Autowired
-    UserRepo repository;
-    @Autowired
-    RoleRepo roleRepo;
-    @Autowired
-    PasswordEncoder passwordEncoder;
-    @Autowired
-    JWTTokenUtils jwtTokenUtil;
-    @Autowired
-    AuthenticationManager authenticationManager;
+    private final UserRepo repository;
+    private final RoleRepo roleRepo;
+    private final PasswordEncoder passwordEncoder;
+    private final JWTTokenUtils jwtTokenUtil;
+    private final AuthenticationManager authenticationManager;
+    private final CloudinaryService cloudinaryService;
+
+    public UserService(UserRepo repository, RoleRepo roleRepo, PasswordEncoder passwordEncoder, JWTTokenUtils jwtTokenUtil, AuthenticationManager authenticationManager, CloudinaryService cloudinaryService) {
+        this.repository = repository;
+        this.roleRepo = roleRepo;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtTokenUtil = jwtTokenUtil;
+        this.authenticationManager = authenticationManager;
+        this.cloudinaryService = cloudinaryService;
+    }
 
 
     @Override
@@ -54,7 +61,16 @@ public class UserService implements IUserService {
         newUser.setPassword(encodedPassword);
         return repository.save(newUser);
     }
-
+    @Transactional
+    public void uploadImage(final Integer id, final MultipartFile file) throws DataNotFoundException {
+        User user = this.repository.findById(id)
+                .orElseThrow(() -> new DataNotFoundException("User not found"));
+        FileUploadUtils.assertAllowed(file, FileUploadUtils.IMAGE_PATTERN);
+        final String fileName = FileUploadUtils.getFileName(file.getOriginalFilename());
+        final CloudinaryResponse response = this.cloudinaryService.uploadFile(file, fileName);
+        user.setImage(response.getUrl());
+        this.repository.save(user);
+    }
     @Override
     public UserDTO update(UserDTO dto) {
         User currentUser = repository.findById(dto.getId()).orElseThrow(() -> new RuntimeException("User does not exits"));
@@ -65,10 +81,10 @@ public class UserService implements IUserService {
             currentUser.setBirthdate(dto.getBirthdate());
             currentUser.setSex(dto.getSex());
             currentUser.setArea(dto.getArea());
-            currentUser.setRole(roleRepo.findById(dto.getRoleId()).get());
-            String password = dto.getPassword();
-            String encoderPass = passwordEncoder.encode(password);
-            currentUser.setPassword(encoderPass);
+            if (dto.getPassword() != null && !dto.getPassword().isEmpty()) {
+                String encodedPassword = passwordEncoder.encode(dto.getPassword());
+                currentUser.setPassword(encodedPassword);
+            }
 
             repository.save(currentUser);
             return convert(currentUser);
@@ -121,28 +137,25 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public String login(String phoneNumber, String password, Integer roleId) throws Exception {
-        User optionalUser = repository.findByPhone(phoneNumber);
-        if(optionalUser == null) {
-            throw new DataNotFoundException("Phone does not exits");
+    public String login(String phoneNumber, String password) throws Exception {
+        User existingUser = repository.findByPhone(phoneNumber);
+        if (existingUser == null) {
+            throw new DataNotFoundException("Phone does not exist");
         }
-        //return optionalUser.get();//muốn trả JWT token ?
-        User existingUser = optionalUser;
-        //check password
-        if(!passwordEncoder.matches(password, existingUser.getPassword())) {
+
+        // Kiểm tra mật khẩu
+        if (!passwordEncoder.matches(password, existingUser.getPassword())) {
             throw new BadCredentialsException("Password doesn't match, please try again");
         }
-        Optional<Role> optionalRole = roleRepo.findById(roleId);
-        if(optionalRole.isEmpty() || !roleId.equals(existingUser.getRole().getId())) {
-            throw new DataNotFoundException("Role not found");
-        }
-        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                phoneNumber, password,
-                existingUser.getAuthorities()
-        );
 
-        //authenticate with Java Spring security
+        // Xác thực bằng Spring Security
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                phoneNumber, password, existingUser.getAuthorities()
+        );
         authenticationManager.authenticate(authenticationToken);
+
+        // Tạo JWT token
         return jwtTokenUtil.generateToken(existingUser);
     }
+
 }

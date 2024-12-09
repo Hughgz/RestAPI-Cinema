@@ -51,9 +51,9 @@ public class MovieDTO {
 
     @NotBlank(message = "Country cannot be blank")
     private String country;
-
     private String rated;
-
+    private String movieUrl;
+    private String type;
     @NotNull(message = "Showing count cannot be null")
     private int showing;
 }

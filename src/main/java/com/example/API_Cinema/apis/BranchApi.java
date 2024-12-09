@@ -5,7 +5,6 @@ import com.example.API_Cinema.dto.BranchDTO;
 import com.example.API_Cinema.exception.MethodArgumentTypeMismatchException;
 import com.example.API_Cinema.service.impl.BranchService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -15,8 +14,12 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/branch")
 public class BranchApi {
-    @Autowired
-    BranchService service;
+
+    private final BranchService service;
+
+    public BranchApi(BranchService service) {
+        this.service = service;
+    }
 
     @PostMapping("/new")
     public ResponseEntity<?> createBranch(@Valid @RequestBody BranchDTO dto, BindingResult result){

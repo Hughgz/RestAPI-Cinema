@@ -18,6 +18,7 @@ public class Bill {
     private int id;
     @CreatedDate
     private LocalDateTime createdDate;
+
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE) // các thực thể liên kết cũng sẽ bị xóa khi thực thể cha bị xóa.

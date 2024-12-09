@@ -2,12 +2,9 @@ package com.example.API_Cinema.apis;
 
 
 import com.example.API_Cinema.dto.ScheduleDTO;
-import com.example.API_Cinema.dto.UserDTO;
-import com.example.API_Cinema.model.Schedule;
+import com.example.API_Cinema.exception.DataNotFoundException;
 import com.example.API_Cinema.service.impl.ScheduleService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.repository.query.Param;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -21,8 +18,12 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/schedule")
 public class ScheduleApi {
-    @Autowired
-    private ScheduleService service;
+
+    private final ScheduleService service;
+
+    public ScheduleApi(ScheduleService service) {
+        this.service = service;
+    }
 
     @PostMapping("/new")
     public ResponseEntity<?> createSchedule(@Valid @RequestBody ScheduleDTO dto, BindingResult result){
@@ -59,13 +60,17 @@ public class ScheduleApi {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-    @GetMapping("")
+    @GetMapping
     public ResponseEntity<List<ScheduleDTO>> getAll(){
         List<ScheduleDTO> scheduleDTOS = service.getAll();
         return ResponseEntity.status(200).body(scheduleDTOS);
     }
-
-    @GetMapping("/find-startTime")
+    @GetMapping("/getSchedulesByMovieUrl/{movieUrl}")
+    public ResponseEntity<List<ScheduleDTO>> getSchedulesByMovieId(@PathVariable String movieUrl) throws DataNotFoundException {
+        List<ScheduleDTO> schedules = service.getSchedulesByMovieId(movieUrl);
+        return ResponseEntity.ok(schedules);
+    }
+    @GetMapping("/findStartTime")
     public ResponseEntity<?> getStartTime(@RequestParam("movieId") int movieId,
                                           @RequestParam("branchId") int branchId,
                                           @RequestParam("startDate") LocalDate startDate)

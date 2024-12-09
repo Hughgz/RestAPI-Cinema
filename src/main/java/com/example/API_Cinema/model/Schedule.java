@@ -16,7 +16,6 @@ public class Schedule {
     private int id;
     private LocalDate startDate;
     private LocalTime startTime;
-    private double price;
 
     @ManyToOne
     @JoinColumn(name = "movie_id", nullable = false)

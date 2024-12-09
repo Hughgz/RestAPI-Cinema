@@ -7,11 +7,11 @@ import java.util.List;
 
 public interface ISeatService {
     Seat insert(SeatDTO dto);
+    List<Seat> insertMultipleSeat(SeatDTO dto);
     SeatDTO update(SeatDTO dto);
     void delete(int seatId);
-    SeatDTO findById(int seatId);
+    SeatDTO getSeatById(int seatId);
     List<SeatDTO> getAll();
     List<SeatDTO> getSeatByScheduleId(int scheduleID);
-
     SeatDTO convert(Seat seat);
 }

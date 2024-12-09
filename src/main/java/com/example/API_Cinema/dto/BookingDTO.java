@@ -10,4 +10,5 @@ public class BookingDTO { //Lưu những người đặt vé
     private int userID;
     private int scheduleID;
     private List<Integer> listSeatID;
+    private double totalAmount;
 }

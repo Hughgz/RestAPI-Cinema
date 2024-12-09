@@ -1,4 +1,4 @@
-package com.example.API_Cinema.repo;
+package com.example.API_Cinema.repository;
 
 import com.example.API_Cinema.model.Branch;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -23,5 +23,8 @@ public interface BranchRepo extends JpaRepository<Branch, Integer> {
     @Query("SELECT b FROM Branch b where b.id in " +
             "(SELECT s.branch.id FROM Schedule s JOIN s.movie m WHERE s.movie.id = :movieId )")
     List<Branch> getBranchThatShowTheMovie(@Param("movieId") Integer movieId);
+    Boolean existsByPhone(String phone);
+    Boolean existsByName(String name);
+    Boolean existsByAddress(String address);
 
 }

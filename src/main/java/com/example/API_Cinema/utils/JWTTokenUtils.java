@@ -23,13 +23,10 @@ import java.util.function.Function;
 @Component
 @RequiredArgsConstructor
 public class JWTTokenUtils {
-
     @Value("${jwt.expiration}")
     private Long expiration; // This should be in seconds
-
     @Value("${jwt.secretKey}")
     private String secretKey;
-
     public String generateToken(User user) throws Exception {
         Map<String, Object> claims = new HashMap<>();
         //this.generateSecretKey();

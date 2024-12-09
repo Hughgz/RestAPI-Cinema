@@ -27,8 +27,7 @@ import java.util.List;
 @EnableWebMvc
 public class WebSecurityConfig {
 
-    @Autowired
-    JwtTokenFilter jwtTokenFilter;
+    private final JwtTokenFilter jwtTokenFilter;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -48,19 +47,25 @@ public class WebSecurityConfig {
                             .requestMatchers(HttpMethod.POST, "/api/movie/**").hasRole(Role.ADMIN)
                             .requestMatchers(HttpMethod.PUT, "/api/movie/**").hasRole(Role.ADMIN)
                             .requestMatchers(HttpMethod.DELETE, "/api/movie/**").hasRole(Role.ADMIN)
-                            .requestMatchers(HttpMethod.GET, "/api/movie/**").hasAnyRole(Role.ADMIN, Role.USER)
+                            .requestMatchers(HttpMethod.GET, "/api/movie/**").permitAll()
 
                             //Request Branch
                             .requestMatchers(HttpMethod.POST, "/api/branch/**").hasRole(Role.ADMIN)
                             .requestMatchers(HttpMethod.PUT, "/api/branch/**").hasRole(Role.ADMIN)
                             .requestMatchers(HttpMethod.DELETE, "/api/branch/**").hasRole(Role.ADMIN)
-                            .requestMatchers(HttpMethod.GET, "/api/branch/**").hasAnyRole(Role.ADMIN, Role.USER)
+                            .requestMatchers(HttpMethod.GET, "/api/branch/**").permitAll()
 
                             //Request Schedule
                             .requestMatchers(HttpMethod.POST, "/api/schedule/**").hasRole(Role.ADMIN)
                             .requestMatchers(HttpMethod.PUT, "/api/schedule/**").hasRole(Role.ADMIN)
                             .requestMatchers(HttpMethod.DELETE, "/api/schedule/**").hasRole(Role.ADMIN)
-                            .requestMatchers(HttpMethod.GET, "/api/schedule/**").hasAnyRole(Role.ADMIN, Role.USER)
+                            .requestMatchers(HttpMethod.GET, "/api/schedule/**").permitAll()
+
+                            //Request BLog
+                            .requestMatchers(HttpMethod.POST, "/api/blog/**").hasRole(Role.ADMIN)
+                            .requestMatchers(HttpMethod.PUT, "/api/blog/**").hasRole(Role.ADMIN)
+                            .requestMatchers(HttpMethod.DELETE, "/api/blog/**").hasRole(Role.ADMIN)
+                            .requestMatchers(HttpMethod.GET, "/api/blog/**").permitAll()
 
                             //Request Bill
                             .requestMatchers(HttpMethod.POST, "/api/bill/**").hasAnyRole(Role.ADMIN, Role.USER)
@@ -68,22 +73,29 @@ public class WebSecurityConfig {
                             .requestMatchers(HttpMethod.DELETE, "/api/bill/**").hasRole(Role.ADMIN)
                             .requestMatchers(HttpMethod.GET, "/api/bill/**").hasAnyRole(Role.ADMIN, Role.USER)
 
-
                             //Request Room
                             .requestMatchers(HttpMethod.POST, "/api/room/**").hasRole(Role.ADMIN)
                             .requestMatchers(HttpMethod.PUT, "/api/room/**").hasAnyRole(Role.ADMIN)
                             .requestMatchers(HttpMethod.DELETE, "/api/room/**").hasRole(Role.ADMIN)
-                            .requestMatchers(HttpMethod.GET, "/api/room/**").hasAnyRole(Role.ADMIN, Role.USER)
+                            .requestMatchers(HttpMethod.GET, "/api/room/**").permitAll()
 
+                            //Request Ticket
+                            .requestMatchers(HttpMethod.GET, "/api/ticket/**").hasAnyRole(Role.USER, Role.ADMIN)
                             //Request Seat
                             .requestMatchers(HttpMethod.POST, "/api/seat/**").hasRole(Role.ADMIN)
                             .requestMatchers(HttpMethod.PUT, "/api/seat/**").hasAnyRole(Role.ADMIN)
                             .requestMatchers(HttpMethod.DELETE, "/api/seat/**").hasRole(Role.ADMIN)
-                            .requestMatchers(HttpMethod.GET, "/api/seat/**").hasAnyRole(Role.ADMIN, Role.USER)
+                            .requestMatchers(HttpMethod.GET, "/api/seat/**").permitAll()
 
+                            //Request Food
+                            .requestMatchers(HttpMethod.POST, "/api/food/**").hasRole(Role.ADMIN)
+                            .requestMatchers(HttpMethod.PUT, "/api/food/**").hasAnyRole(Role.ADMIN)
+                            .requestMatchers(HttpMethod.DELETE, "/api/food/**").hasRole(Role.ADMIN)
+                            .requestMatchers(HttpMethod.GET, "/api/food/**").permitAll()
+
+                            .requestMatchers("/api/payment/vnpay-payment").permitAll()
                             //Request bill
-                            .requestMatchers(HttpMethod.POST, "/api/bill/**").hasRole(Role.USER)
-
+                            .requestMatchers(HttpMethod.POST, "/api/bill/**").permitAll()
                             .anyRequest()
                             .authenticated();
                 })
@@ -94,7 +106,7 @@ public class WebSecurityConfig {
                 CorsConfiguration configuration = new CorsConfiguration();
                 configuration.setAllowedOrigins(List.of("*"));
                 configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-                configuration.setAllowedHeaders(Arrays.asList("authorization", "content-type", "x-auth-token"));
+                configuration.setAllowedHeaders(Arrays.asList("authorization", "content-type", "x-auth-token", "site-type"));
                 configuration.setExposedHeaders(List.of("x-auth-token"));
                 UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
                 source.registerCorsConfiguration("/**", configuration);

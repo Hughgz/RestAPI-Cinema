@@ -20,5 +20,6 @@ public interface IMovieService {
     void uploadLargeImage(final Integer id, final MultipartFile file) throws DataNotFoundException;
     MovieDTO convert(Movie movie);
     MovieDTO findById(int id);
+    MovieDTO getMovieByMovieUrl(String movieUrl) throws DataNotFoundException;
 
 }

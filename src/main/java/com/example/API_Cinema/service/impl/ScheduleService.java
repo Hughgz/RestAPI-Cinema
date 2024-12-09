@@ -2,19 +2,14 @@ package com.example.API_Cinema.service.impl;
 
 import com.example.API_Cinema.dto.ScheduleDTO;
 import com.example.API_Cinema.exception.DataNotFoundException;
-import com.example.API_Cinema.model.Branch;
-import com.example.API_Cinema.model.Movie;
-import com.example.API_Cinema.model.Room;
+import com.example.API_Cinema.exception.ExistsDataException;
 import com.example.API_Cinema.model.Schedule;
-import com.example.API_Cinema.repo.BranchRepo;
-import com.example.API_Cinema.repo.MovieRepo;
-import com.example.API_Cinema.repo.RoomRepo;
-import com.example.API_Cinema.repo.ScheduleRepo;
+import com.example.API_Cinema.repository.BranchRepo;
+import com.example.API_Cinema.repository.MovieRepo;
+import com.example.API_Cinema.repository.RoomRepo;
+import com.example.API_Cinema.repository.ScheduleRepo;
 import com.example.API_Cinema.service.IScheduleService;
-import lombok.NoArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -25,16 +20,20 @@ import java.util.stream.Collectors;
 
 @Service
 public class ScheduleService implements IScheduleService {
-    @Autowired
-    private ScheduleRepo repo;
-    @Autowired
-    private MovieRepo movieRepo;
-    @Autowired
-    private BranchRepo branchRepo;
-    @Autowired
-    private RoomRepo roomRepo;
+    private final ScheduleRepo repo;
+    private final MovieRepo movieRepo;
+    private final BranchRepo branchRepo;
+    private final RoomRepo roomRepo;
+
+    public ScheduleService(ScheduleRepo repo, MovieRepo movieRepo, BranchRepo branchRepo, RoomRepo roomRepo) {
+        this.repo = repo;
+        this.movieRepo = movieRepo;
+        this.branchRepo = branchRepo;
+        this.roomRepo = roomRepo;
+    }
+
     @Override
-    public void insert(ScheduleDTO dto) throws DataNotFoundException {
+    public void insert(ScheduleDTO dto) throws DataNotFoundException, ExistsDataException {
         Schedule schedule = new ModelMapper().map(dto, Schedule.class);
         branchRepo.findById(dto.getBranchID())
                 .orElseThrow(() -> new DataNotFoundException("Branch with ID " + dto.getBranchID() + " does not exist"));
@@ -43,6 +42,11 @@ public class ScheduleService implements IScheduleService {
                 .orElseThrow(() -> new DataNotFoundException("Room with ID " + dto.getRoomID() + " does not exist"));
         movieRepo.findById(dto.getMovieID())
                 .orElseThrow(() -> new DataNotFoundException("Movie with ID " + dto.getMovieID() + " does not exist"));
+        if(repo.existsByStartDate(dto.getStartDate())){
+            if(repo.existsByStartTime(dto.getStartTime())) {
+                throw new ExistsDataException("Schedule " + dto.getStartTime() + " already exists");
+            }
+        }
         repo.save(schedule);
     }
 
@@ -52,7 +56,6 @@ public class ScheduleService implements IScheduleService {
         if(currentSchedule != null){
             currentSchedule.setStartDate(dto.getStartDate());
             currentSchedule.setStartTime(dto.getStartTime());
-            currentSchedule.setPrice(dto.getPrice());
 
             repo.save(currentSchedule);
             return convert(currentSchedule);
@@ -81,7 +84,16 @@ public class ScheduleService implements IScheduleService {
     @Override
     public List<ScheduleDTO> getSchedulesByMovieIdAndBranchIdAndStartDateAndStartTimeAndRoomId(int movieId, int branchId, LocalDate startDate, LocalTime startTime, int roomId) {
         List<Schedule> schedules = repo.getSchedulesByMovieIdAndBranchIdAndStartDateAndStartTimeAndRoomId(movieId, branchId, startDate, startTime, roomId);
-        return schedules.stream().map(schedule -> convert(schedule)).collect(Collectors.toList());
+        return schedules.stream().map(this::convert).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ScheduleDTO> getSchedulesByMovieId(String movieUrl) throws DataNotFoundException {
+        if(movieRepo.findByMovieUrl(movieUrl) == null){
+            throw new DataNotFoundException("Movie not found");
+        }
+        List<Schedule> schedules = repo.getSchedulesByMovieId(movieUrl);
+        return schedules.stream().map(this::convert).collect(Collectors.toList());
     }
 
     @Override
