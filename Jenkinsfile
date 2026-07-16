@@ -33,7 +33,7 @@ pipeline {
             steps {
                 withCredentials([sshUserPrivateKey(credentialsId: "${SSH_KEY_ID}", keyFileVariable: 'SSH_KEY')]) {
                     bat """
-                        ssh -i %SSH_KEY% -o StrictHostKeyChecking=no ${VPS_USER}@${VPS_HOST} "cd ${VPS_DIR} && git pull origin master && docker-compose down && docker-compose build --no-cache && docker-compose up -d"
+                        ssh -i %SSH_KEY% -o StrictHostKeyChecking=no ${VPS_USER}@${VPS_HOST} "cd ${VPS_DIR} && git pull origin master && docker-compose down && docker-compose build && docker-compose up -d"
                     """
                 }
             }
