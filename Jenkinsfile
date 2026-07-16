@@ -2,17 +2,18 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE    = 'minhhieu1108/cinema-api'
-        DOCKER_TAG      = "${BUILD_NUMBER}"
-        COMPOSE_PROJECT = 'cinema'
+        VPS_USER   = 'root'
+        VPS_HOST   = '103.77.242.65'
+        VPS_DIR    = '/opt/RestAPI-Cinema'
+        SSH_KEY_ID = 'SHA256:8IR2vSFD0Y53cqoy7glfkZepbUnxxO0bILczvEIsPQs'
     }
 
     stages {
         stage('Checkout') {
             steps {
                 git branch: 'main',
-                    url: 'https://github.com/your-user/RestAPI-Cinema.git',
-                    credentialsId: 'github-credentials'
+                    url: 'https://github.com/Hughgz/RestAPI-Cinema.git',
+                    credentialsId: 'SHA256:wgxEMTwwa1C0/foq6+Q8b1tBlIr6XQy9lGI8eHtpO58'
             }
         }
 
@@ -28,31 +29,22 @@ pipeline {
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Transfer to VPS') {
             steps {
-                script {
-                    docker.build("${DOCKER_IMAGE}:${DOCKER_TAG}")
+                sshagent(["${SSH_KEY_ID}"]) {
+                    bat """
+                        scp -o StrictHostKeyChecking=no -r pom.xml mvnw.cmd .mvn src Dockerfile docker-compose.yml ${VPS_USER}@${VPS_HOST}:${VPS_DIR}/
+                    """
                 }
             }
         }
 
-        stage('Push Docker Image') {
+        stage('Build & Deploy on VPS') {
             steps {
-                script {
-                    docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-credentials') {
-                        docker.image("${DOCKER_IMAGE}:${DOCKER_TAG}").push()
-                        docker.image("${DOCKER_IMAGE}:${DOCKER_TAG}").push('latest')
-                    }
-                }
-            }
-        }
-
-        stage('Deploy') {
-            steps {
-                sshagent(['ssh-deploy-key']) {
-                    bat '''
-                        ssh root@103.77.242.65 "cd /opt/RestAPI-Cinema/ && docker-compose pull && docker-compose up -d"
-                    '''
+                sshagent(["${SSH_KEY_ID}"]) {
+                    bat """
+                        ssh -o StrictHostKeyChecking=no ${VPS_USER}@${VPS_HOST} "cd ${VPS_DIR} && docker-compose down && docker-compose build --no-cache && docker-compose up -d"
+                    """
                 }
             }
         }
