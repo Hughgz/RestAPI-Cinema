@@ -31,9 +31,9 @@ pipeline {
 
         stage('Transfer to VPS') {
             steps {
-                sshagent(["${SSH_KEY_ID}"]) {
+                withCredentials([sshUserPrivateKey(credentialsId: "${SSH_KEY_ID}", keyFileVariable: 'SSH_KEY')]) {
                     bat """
-                        scp -o StrictHostKeyChecking=no -r pom.xml mvnw.cmd .mvn src Dockerfile docker-compose.yml ${VPS_USER}@${VPS_HOST}:${VPS_DIR}/
+                        scp -i %SSH_KEY% -o StrictHostKeyChecking=no -r pom.xml mvnw.cmd .mvn src Dockerfile docker-compose.yml ${VPS_USER}@${VPS_HOST}:${VPS_DIR}/
                     """
                 }
             }
@@ -41,9 +41,9 @@ pipeline {
 
         stage('Build & Deploy on VPS') {
             steps {
-                sshagent(["${SSH_KEY_ID}"]) {
+                withCredentials([sshUserPrivateKey(credentialsId: "${SSH_KEY_ID}", keyFileVariable: 'SSH_KEY')]) {
                     bat """
-                        ssh -o StrictHostKeyChecking=no ${VPS_USER}@${VPS_HOST} "cd ${VPS_DIR} && docker-compose down && docker-compose build --no-cache && docker-compose up -d"
+                        ssh -i %SSH_KEY% -o StrictHostKeyChecking=no ${VPS_USER}@${VPS_HOST} "cd ${VPS_DIR} && docker-compose down && docker-compose build --no-cache && docker-compose up -d"
                     """
                 }
             }
