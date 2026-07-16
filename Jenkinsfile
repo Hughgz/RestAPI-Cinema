@@ -29,21 +29,11 @@ pipeline {
             }
         }
 
-        stage('Transfer to VPS') {
+        stage('Deploy on VPS') {
             steps {
                 withCredentials([sshUserPrivateKey(credentialsId: "${SSH_KEY_ID}", keyFileVariable: 'SSH_KEY')]) {
                     bat """
-                        scp -i %SSH_KEY% -o StrictHostKeyChecking=no -r pom.xml mvnw.cmd .mvn src Dockerfile docker-compose.yml ${VPS_USER}@${VPS_HOST}:${VPS_DIR}/
-                    """
-                }
-            }
-        }
-
-        stage('Build & Deploy on VPS') {
-            steps {
-                withCredentials([sshUserPrivateKey(credentialsId: "${SSH_KEY_ID}", keyFileVariable: 'SSH_KEY')]) {
-                    bat """
-                        ssh -i %SSH_KEY% -o StrictHostKeyChecking=no ${VPS_USER}@${VPS_HOST} "cd ${VPS_DIR} && docker-compose down && docker-compose build --no-cache && docker-compose up -d"
+                        ssh -i %SSH_KEY% -o StrictHostKeyChecking=no ${VPS_USER}@${VPS_HOST} "cd ${VPS_DIR} && git pull origin master && docker-compose down && docker-compose build --no-cache && docker-compose up -d"
                     """
                 }
             }
