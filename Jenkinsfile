@@ -5,15 +5,15 @@ pipeline {
         VPS_USER   = 'root'
         VPS_HOST   = '103.77.242.65'
         VPS_DIR    = '/opt/RestAPI-Cinema'
-        SSH_KEY_ID = 'SHA256:8IR2vSFD0Y53cqoy7glfkZepbUnxxO0bILczvEIsPQs'
+        SSH_KEY_ID = 'ssh-key'
     }
 
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main',
+                git branch: 'master',
                     url: 'https://github.com/Hughgz/RestAPI-Cinema.git',
-                    credentialsId: 'SHA256:wgxEMTwwa1C0/foq6+Q8b1tBlIr6XQy9lGI8eHtpO58'
+                    credentialsId: 'ssh-key'
             }
         }
 
