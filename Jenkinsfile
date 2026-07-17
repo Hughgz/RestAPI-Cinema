@@ -27,7 +27,11 @@ pipeline {
                 script {
                     def maxRetries = 30
                     def retryCount = 0
-                    def healthUrl = "http://localhost:${APP_PORT ?: '8081'}/actuator/health"
+                    def appPort = sh(script: "grep APP_PORT .env | cut -d'=' -f2", returnStdout: true).trim()
+                    if (!appPort) {
+                        appPort = '8081'
+                    }
+                    def healthUrl = "http://localhost:${appPort}/actuator/health"
                     
                     while (retryCount < maxRetries) {
                         retryCount++
