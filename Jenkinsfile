@@ -22,6 +22,34 @@ pipeline {
             }
         }
 
+        stage('Health Check') {
+            steps {
+                script {
+                    def maxRetries = 30
+                    def retryCount = 0
+                    def healthUrl = "http://localhost:${APP_PORT ?: '8081'}/actuator/health"
+                    
+                    while (retryCount < maxRetries) {
+                        retryCount++
+                        echo "Health check attempt ${retryCount}/${maxRetries}..."
+                        sleep(time: 5, unit: 'SECONDS')
+                        
+                        try {
+                            def response = sh(script: "curl -sf ${healthUrl}", returnStdout: true).trim()
+                            if (response.contains('UP')) {
+                                echo "Health check passed: ${response}"
+                                return
+                            }
+                        } catch (Exception e) {
+                            echo "Waiting for app to start..."
+                        }
+                    }
+                    
+                    error("Health check failed after ${maxRetries} attempts")
+                }
+            }
+        }
+
         stage('Cleanup') {
             steps {
                 sh 'docker image prune -f'
