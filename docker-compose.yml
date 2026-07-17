@@ -26,7 +26,7 @@ services:
       mysql:
         condition: service_healthy
     ports:
-      - "${APP_PORT:-8080}:8080"
+      - "${APP_PORT:-8081}:8080"
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE:-db_cinema}
       SPRING_DATASOURCE_USERNAME: ${MYSQL_ROOT_USERNAME:-root}
