@@ -94,6 +94,7 @@ public class WebSecurityConfig {
                             .requestMatchers(HttpMethod.GET, "/api/food/**").permitAll()
 
                             .requestMatchers("/api/payment/vnpay-payment").permitAll()
+                            .requestMatchers("/actuator/**").permitAll()
                             //Request bill
                             .requestMatchers(HttpMethod.POST, "/api/bill/**").permitAll()
                             .anyRequest()

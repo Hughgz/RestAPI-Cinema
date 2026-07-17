@@ -3,6 +3,7 @@ package com.example.API_Cinema.config;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -10,12 +11,22 @@ import com.cloudinary.Cloudinary;
 
 @Configuration
 public class CloudinaryConfig {
+
+    @Value("${cloudinary.cloudName}")
+    private String cloudName;
+
+    @Value("${cloudinary.apiKey}")
+    private String apiKey;
+
+    @Value("${cloudinary.apiSecret}")
+    private String apiSecret;
+
     @Bean
     public Cloudinary cloudinary() {
         final Map<String, String> config = new HashMap<>();
-        config.put("cloud_name", "dahzoj4fy");
-        config.put("api_key", "884148763248879");
-        config.put("api_secret", "a6dL6HNdCJBOryZU46zTfaRyH-E");
+        config.put("cloud_name", cloudName);
+        config.put("api_key", apiKey);
+        config.put("api_secret", apiSecret);
         return new Cloudinary(config);
     }
 }
