@@ -1,35 +1,24 @@
 pipeline {
     agent any
 
-    environment {
-        VPS_DIR = '/opt/RestAPI-Cinema'
-    }
-
     stages {
-        stage('Checkout') {
+        stage('Prepare') {
             steps {
-                dir("${VPS_DIR}") {
-                    git branch: 'master',
-                        url: 'https://github.com/Hughgz/RestAPI-Cinema.git',
-                        credentialsId: 'github-cred'
-                }
+                sh 'git pull origin master'
+                sh 'cp /opt/RestAPI-Cinema/.env .'
             }
         }
 
         stage('Docker Build') {
             steps {
-                dir("${VPS_DIR}") {
-                    sh 'docker-compose build'
-                }
+                sh 'docker-compose build'
             }
         }
 
         stage('Deploy') {
             steps {
-                dir("${VPS_DIR}") {
-                    sh 'docker-compose down'
-                    sh 'docker-compose up -d'
-                }
+                sh 'docker-compose down'
+                sh 'docker-compose up -d'
             }
         }
 
